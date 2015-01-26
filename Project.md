@@ -1,23 +1,54 @@
----
-title: "Project-Machine Learning"
-author: "Anurag Garg"
-date: "Sunday, January 18, 2015"
-output:
-  html_document:
-    keep_md: yes
----
+# Project-Machine Learning
+Anurag Garg  
+Sunday, January 18, 2015  
 
-```{r setup}
+
+```r
 library(caret)
+```
+
+```
+## Warning: package 'caret' was built under R version 3.1.2
+```
+
+```
+## Loading required package: lattice
+## Loading required package: ggplot2
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.1.1
+```
+
+```r
 library(rpart)
+```
+
+```
+## Warning: package 'rpart' was built under R version 3.1.2
+```
+
+```r
 library(randomForest)
+```
+
+```
+## Warning: package 'randomForest' was built under R version 3.1.2
+```
+
+```
+## randomForest 4.6-10
+## Type rfNews() to see new features/changes/bug fixes.
+```
+
+```r
 set.seed(1991)
 suppressMessages(library(caret))
-````
+```
 
 ##Background
 
-Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement  a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
 
 ## Project Goal
 Participants were asked to perform barbell lifts correctly and incorrectly in 5 different ways. The goal will be to use the data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants and predict the manner in which a number of participants have performed a set of workouts using data from several wearable sensors.
@@ -41,7 +72,8 @@ https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 
 Since the training dataset will be used to train & test the model, divide the training dataset into two , 70% observations in one set to train data and the remaining 30% to test data. 
 
-```{r Read data}
+
+```r
 if (!file.exists("pml-training.csv")) {
     download.file("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", 
                   destfile = "pml-training.csv")
@@ -64,7 +96,8 @@ test<-training[-inTrain,]
 
 Delete those columns which have NA values for observations where the variable new_ window="no" as their values are not available at regular intervals. Note that other columns like user_name and raw_time can also be removed as we go and test our model outside the given dataset.and numeric values otherwise ("yes").  
 
-```{r}
+
+```r
 trainClean<-train[,-c(grep("^max|^min|^amplitude|^avg|^var|^stddev|^kurtosis|^skewness",colnames(train)))]
 testClean<-test[,-c(grep("^max|^min|^amplitude|^avg|^var|^stddev|^kurtosis|^skewness",colnames(test)))]
 testingClean<-testing[,-c(grep("^max|^min|^amplitude|^avg|^var|^stddev|^kurtosis|^skewness",colnames(testing)))]
@@ -75,7 +108,8 @@ testingClean<-testing[,-c(grep("^max|^min|^amplitude|^avg|^var|^stddev|^kurtosis
 ###1. Random Forest 
 We build a model using Random Forest Model (in interest of time) and it will be able to predict the classe on our testClean data set after training.
 
-```{r}
+
+```r
 suppressMessages(library(caret))
 rfpr <- train(trainClean$classe ~ ., method="rf", data=trainClean, prox=T, 
               verbose=F)
@@ -83,10 +117,15 @@ rfpr <- train(trainClean$classe ~ ., method="rf", data=trainClean, prox=T,
 
 To check accuracy, use test dataset created how accurate we are using the validation dataset:  
 
-```{r}
+
+```r
 predictVal <- predict(rfpr, trainClean)
 RFAccuracy <- sum(predictVal == trainClean$classe) / length(predictVal)
 print(RFAccuracy)
+```
+
+```
+## [1] 1
 ```
 
 Accuracy of the model is equal to roughly 99%.
@@ -95,7 +134,8 @@ Accuracy of the model is equal to roughly 99%.
 
 Since classe is same as the num_window for train data and test data is taken from training data therefore we should get 100%.
 
-```{r}
+
+```r
 predictions<-rep(factor(c("A","B","C","D","E")),dim(testing)[1]%/%5)
 for (i in 1:dim(testing)[1])
 {
@@ -103,6 +143,11 @@ for (i in 1:dim(testing)[1])
 }
 
 print(predictions)
+```
+
+```
+##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E
 ```
 
 
